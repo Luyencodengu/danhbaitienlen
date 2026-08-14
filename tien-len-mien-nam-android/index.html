@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#063d2c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Tiến Lên Miền Nam</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand" aria-label="Tiến Lên Miền Nam">
+                <span class="brand-suits" aria-hidden="true">♠</span>
+                <div>
+                    <strong>TIẾN LÊN</strong>
+                    <small>MIỀN NAM</small>
+                </div>
+            </div>
+
+            <div class="topbar-actions">
+                <span id="turnBadge" class="turn-badge">Chưa bắt đầu</span>
+                <button id="rulesButton" class="icon-button" type="button" aria-label="Xem luật chơi">?</button>
+                <button id="newGameButton" class="secondary-button" type="button">Ván mới</button>
+            </div>
+        </header>
+
+        <main id="gameBoard" class="game-board" aria-label="Bàn chơi Tiến Lên">
+            <section id="player2" class="player-seat player-top" aria-label="Đối thủ phía trên">
+                <div class="player-info">
+                    <span class="avatar avatar-purple">M</span>
+                    <div>
+                        <strong class="player-name">Máy 2</strong>
+                        <span class="card-count">13 lá</span>
+                    </div>
+                </div>
+                <div class="back-cards" aria-hidden="true"></div>
+                <span class="status-chip"></span>
+            </section>
+
+            <section id="player1" class="player-seat player-left" aria-label="Đối thủ bên trái">
+                <div class="player-info">
+                    <span class="avatar avatar-blue">M</span>
+                    <div>
+                        <strong class="player-name">Máy 1</strong>
+                        <span class="card-count">13 lá</span>
+                    </div>
+                </div>
+                <div class="back-cards" aria-hidden="true"></div>
+                <span class="status-chip"></span>
+            </section>
+
+            <section class="table-center" aria-live="polite">
+                <div class="table-mark">
+                    <span>TIẾN LÊN</span>
+                    <small>MIỀN NAM</small>
+                </div>
+                <p id="tableMessage" class="table-message">Nhấn “Bắt đầu chơi” để chia bài</p>
+                <div id="playedCards" class="played-cards"></div>
+                <span id="lastPlayer" class="last-player"></span>
+            </section>
+
+            <section id="player3" class="player-seat player-right" aria-label="Đối thủ bên phải">
+                <div class="player-info">
+                    <span class="avatar avatar-orange">M</span>
+                    <div>
+                        <strong class="player-name">Máy 3</strong>
+                        <span class="card-count">13 lá</span>
+                    </div>
+                </div>
+                <div class="back-cards" aria-hidden="true"></div>
+                <span class="status-chip"></span>
+            </section>
+
+            <section id="player0" class="human-area" aria-label="Bài của bạn">
+                <div class="human-meta">
+                    <div class="player-info">
+                        <span class="avatar avatar-human">B</span>
+                        <div>
+                            <strong class="player-name">Bạn</strong>
+                            <span class="card-count">13 lá</span>
+                        </div>
+                    </div>
+                    <span class="status-chip"></span>
+                </div>
+
+                <div id="humanHand" class="human-hand" aria-label="Các lá bài của bạn"></div>
+
+                <div class="game-controls">
+                    <button id="sortButton" class="control-button sort-button" type="button">Sắp xếp</button>
+                    <button id="passButton" class="control-button pass-button" type="button" disabled>Bỏ lượt</button>
+                    <button id="playButton" class="control-button play-button" type="button" disabled>
+                        Đánh bài <span id="selectedCount">0</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="startModal" class="modal open" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <div class="modal-card start-card">
+            <div class="modal-symbols" aria-hidden="true"><span>♠</span><span>♥</span><span>♣</span><span>♦</span></div>
+            <p class="eyebrow">GAME BÀI VIỆT NAM</p>
+            <h1 id="startTitle">Tiến Lên Miền Nam</h1>
+            <p>Bạn sẽ đấu với 3 máy. Ván đầu tiên, người có <strong>3♠</strong> phải đánh trước.</p>
+            <ul class="feature-list">
+                <li>Chọn lá bài bằng cách nhấn vào bài</li>
+                <li>Đánh hết bài trước để giành chiến thắng</li>
+                <li>Có hỗ trợ sảnh, đôi, sám, tứ quý và đôi thông</li>
+            </ul>
+            <button id="startButton" class="primary-button" type="button">Bắt đầu chơi</button>
+        </div>
+    </div>
+
+    <div id="rulesModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <div class="modal-card rules-card">
+            <button id="closeRulesButton" class="modal-close" type="button" aria-label="Đóng">×</button>
+            <p class="eyebrow">HƯỚNG DẪN</p>
+            <h2 id="rulesTitle">Luật đang áp dụng</h2>
+            <div class="rules-grid">
+                <div><strong>Bộ hợp lệ</strong><span>Lẻ, đôi, sám cô, sảnh từ 3 lá, tứ quý, 3–4 đôi thông.</span></div>
+                <div><strong>Thứ tự chất</strong><span>♠ Bích &lt; ♣ Tép &lt; ♦ Rô &lt; ♥ Cơ.</span></div>
+                <div><strong>Ván đầu</strong><span>Người giữ 3♠ đi trước và nước đầu phải chứa 3♠.</span></div>
+                <div><strong>Chặt 2</strong><span>Ba đôi thông chặt một 2; tứ quý và bốn đôi thông có thể chặt đôi 2.</span></div>
+            </div>
+            <button id="understoodButton" class="primary-button" type="button">Đã hiểu</button>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <div class="modal-card result-card">
+            <div id="resultIcon" class="result-icon">🏆</div>
+            <p class="eyebrow">KẾT THÚC VÁN</p>
+            <h2 id="resultTitle">Kết quả</h2>
+            <div id="rankingList" class="ranking-list"></div>
+            <button id="playAgainButton" class="primary-button" type="button">Chơi ván mới</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <aside class="orientation-hint" aria-label="Hướng dẫn xoay màn hình">
+        <div class="phone-icon" aria-hidden="true">↻</div>
+        <strong>Hãy xoay ngang điện thoại</strong>
+        <span>Game được tối ưu cho màn hình ngang.</span>
+    </aside>
+
+    <script src="js/cards.js" defer></script>
+    <script src="js/rules.js" defer></script>
+    <script src="js/bot.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/game.js" defer></script>
+</body>
+</html>

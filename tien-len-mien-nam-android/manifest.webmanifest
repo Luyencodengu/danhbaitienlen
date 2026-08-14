@@ -1,0 +1,12 @@
+{
+  "name": "Tiến Lên Miền Nam",
+  "short_name": "Tiến Lên",
+  "description": "Game Tiến Lên Miền Nam chơi với ba máy.",
+  "lang": "vi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#02291e",
+  "theme_color": "#063d2c"
+}
