@@ -104,6 +104,14 @@
             return null;
         }
 
+        if (settings.difficulty === "easy") {
+            const safeMoves = legalMoves.filter(function (move) {
+                return move.combo.type !== "quad" && move.combo.type !== "pairSequence";
+            });
+            const pool = safeMoves.length ? safeMoves : legalMoves;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
         if (!currentCombo) {
             return chooseLeadMove(legalMoves, hand.length);
         }

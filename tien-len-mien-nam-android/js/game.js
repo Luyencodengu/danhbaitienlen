@@ -19,6 +19,8 @@
         selectedCardIds: new Set(),
         passedPlayerIds: new Set(),
         rankings: [],
+        difficulty: "easy",
+        rewardSettled: false,
         players: createPlayers()
     };
 
@@ -45,7 +47,7 @@
         }).id;
     }
 
-    function startGame() {
+    function startGame(difficulty) {
         window.clearTimeout(botTimer);
         resetPlayers();
 
@@ -58,6 +60,8 @@
         state.selectedCardIds.clear();
         state.passedPlayerIds.clear();
         state.rankings = [];
+        state.difficulty = difficulty || (app.Portal && app.Portal.getDifficulty ? app.Portal.getDifficulty() : "easy");
+        state.rewardSettled = false;
 
         UI.render(state);
 
@@ -68,6 +72,11 @@
         }
 
         scheduleCurrentTurn();
+    }
+
+    function stopGame() {
+        window.clearTimeout(botTimer);
+        state.started = false;
     }
 
     function isHumanTurn() {
@@ -155,7 +164,12 @@
         if (state.gameOver) {
             UI.render(state);
             botTimer = window.setTimeout(function () {
-                UI.showResult(state.rankings);
+                let settlement = null;
+                if (!state.rewardSettled && app.Portal && app.Portal.settleResult) {
+                    settlement = app.Portal.settleResult(state.rankings[0].id === 0);
+                    state.rewardSettled = true;
+                }
+                UI.showResult(state.rankings, settlement);
             }, 700);
             return;
         }
@@ -254,7 +268,7 @@
 
         botTimer = window.setTimeout(function () {
             makeBotMove(current.id);
-        }, 650 + Math.floor(Math.random() * 450));
+        }, (state.difficulty === "hard" ? 430 : 720) + Math.floor(Math.random() * 350));
     }
 
     function makeBotMove(playerId) {
@@ -266,7 +280,8 @@
         const currentCombo = state.tablePlay ? state.tablePlay.combo : null;
         const move = Bot.chooseMove(player.hand, currentCombo, {
             requiredCardId: state.firstMove ? "3-0" : null,
-            opponents: state.players.filter(function (item) { return item.id !== playerId; })
+            opponents: state.players.filter(function (item) { return item.id !== playerId; }),
+            difficulty: state.difficulty
         });
 
         if (!move) {
@@ -287,4 +302,10 @@
     });
 
     UI.render(state);
+
+    app.Game = {
+        start: startGame,
+        stop: stopGame,
+        getState: function () { return state; }
+    };
 }());

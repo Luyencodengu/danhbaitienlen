@@ -15,25 +15,21 @@
         elements.playedCards = document.getElementById("playedCards");
         elements.lastPlayer = document.getElementById("lastPlayer");
         elements.humanHand = document.getElementById("humanHand");
+        elements.selectedTray = document.getElementById("selectedTray");
         elements.selectedCount = document.getElementById("selectedCount");
         elements.playButton = document.getElementById("playButton");
         elements.passButton = document.getElementById("passButton");
         elements.sortButton = document.getElementById("sortButton");
-        elements.startModal = document.getElementById("startModal");
         elements.rulesModal = document.getElementById("rulesModal");
         elements.resultModal = document.getElementById("resultModal");
         elements.resultTitle = document.getElementById("resultTitle");
         elements.resultIcon = document.getElementById("resultIcon");
         elements.rankingList = document.getElementById("rankingList");
+        elements.tokenResult = document.getElementById("tokenResult");
         elements.toast = document.getElementById("toast");
     }
 
     function bindEvents() {
-        document.getElementById("startButton").addEventListener("click", function () {
-            closeModal(elements.startModal);
-            handlers.onStart();
-        });
-
         document.getElementById("newGameButton").addEventListener("click", handlers.onNewGame);
         document.getElementById("playAgainButton").addEventListener("click", function () {
             closeModal(elements.resultModal);
@@ -60,9 +56,16 @@
             }
         });
 
-        [elements.rulesModal, elements.startModal].forEach(function (modal) {
+        elements.selectedTray.addEventListener("click", function (event) {
+            const cardButton = event.target.closest("[data-card-id]");
+            if (cardButton) {
+                handlers.onCardToggle(cardButton.dataset.cardId);
+            }
+        });
+
+        [elements.rulesModal].forEach(function (modal) {
             modal.addEventListener("click", function (event) {
-                if (event.target === modal && modal !== elements.startModal) {
+                if (event.target === modal) {
                     closeModal(modal);
                 }
             });
@@ -149,13 +152,29 @@
         const human = state.players[0];
         const disabled = state.currentPlayer !== 0 || state.gameOver || human.finished;
 
-        elements.humanHand.innerHTML = human.hand.map(function (card) {
+        const selectedCards = human.hand.filter(function (card) {
+            return state.selectedCardIds.has(card.id);
+        });
+
+        const handCards = human.hand.filter(function (card) {
+            return !state.selectedCardIds.has(card.id);
+        });
+
+        elements.humanHand.innerHTML = handCards.map(function (card) {
             return cardMarkup(card, {
                 clickable: true,
-                selected: state.selectedCardIds.has(card.id),
+                selected: false,
                 disabled: disabled
             });
         }).join("");
+
+        elements.selectedTray.innerHTML = selectedCards.length ? selectedCards.map(function (card) {
+            return cardMarkup(card, {
+                clickable: true,
+                selected: false,
+                disabled: disabled
+            });
+        }).join("") : "<span>Chạm vào bài để đưa lên</span>";
 
         elements.selectedCount.textContent = state.selectedCardIds.size;
     }
@@ -212,7 +231,7 @@
         }, 2600);
     }
 
-    function showResult(rankings) {
+    function showResult(rankings, settlement) {
         const humanRank = rankings.findIndex(function (player) { return player.id === 0; }) + 1;
         const medals = ["🥇", "🥈", "🥉", "4"];
 
@@ -225,6 +244,15 @@
                 "<span>Hạng " + (index + 1) + "</span>" +
                 "</div>";
         }).join("");
+
+        if (settlement) {
+            elements.tokenResult.className = "token-result" + (settlement.delta < 0 ? " loss" : "");
+            elements.tokenResult.textContent = (settlement.delta >= 0 ? "+" : "") +
+                settlement.delta.toLocaleString("vi-VN") + " token • Số dư " +
+                settlement.balance.toLocaleString("vi-VN");
+        } else {
+            elements.tokenResult.textContent = "";
+        }
         openModal(elements.resultModal);
     }
 
@@ -234,6 +262,7 @@
         toast: toast,
         showResult: showResult,
         openModal: openModal,
-        closeModal: closeModal
+        closeModal: closeModal,
+        cardMarkup: cardMarkup
     };
 }());

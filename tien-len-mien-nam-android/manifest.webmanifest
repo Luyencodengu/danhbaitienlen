@@ -1,7 +1,7 @@
 {
-  "name": "Tiến Lên Miền Nam",
-  "short_name": "Tiến Lên",
-  "description": "Game Tiến Lên Miền Nam chơi với ba máy.",
+  "name": "Sảnh Game Bài Việt",
+  "short_name": "Game Bài Việt",
+  "description": "Tiến Lên, Spider, FreeCell và bàn chơi cùng bạn bè.",
   "lang": "vi",
   "start_url": "./index.html",
   "scope": "./",

@@ -1,33 +1,50 @@
-# Game Tiến Lên Miền Nam – bản Android ngang
+# Sảnh Game Bài Việt
 
-Phiên bản dùng HTML, CSS và JavaScript thuần. Người chơi đấu với 3 máy, không cần cài thư viện và giao diện đã được tối ưu cho điện thoại Android ở chế độ màn hình ngang.
+Ứng dụng HTML, CSS và JavaScript thuần, tối ưu cho máy tính và điện thoại Android nằm ngang. Không cần cài thư viện.
 
-## Chạy game
+## Trò chơi
 
-1. Mở thư mục `tien-len-mien-nam-android` bằng Visual Studio Code.
-2. Cài tiện ích **Live Server** nếu máy chưa có.
-3. Nhấn chuột phải vào `index.html` và chọn **Open with Live Server**.
+- **Tiến Lên Miền Nam:** một người đấu với ba máy; bài chọn được đưa lên khay riêng.
+- **Spider Solitaire:** Dễ dùng một chất, Siêu khó dùng bốn chất.
+- **FreeCell Solitaire:** Dễ có sáu ô trống, Siêu khó có bốn ô chuẩn.
+- **Chơi cùng bạn bè:** 2–4 người chuyền cùng một thiết bị; màn hình che bài giữa các lượt.
 
-Bạn cũng có thể mở trực tiếp `index.html`, nhưng Live Server giúp cập nhật giao diện ngay sau khi lưu code.
+## Token và độ khó
 
-## Thử trên điện thoại Android
+Ba trò chơi với máy dùng chung số dư lưu trong `localStorage`:
 
-1. Cho máy tính và điện thoại dùng chung Wi-Fi.
-2. Chạy game bằng Live Server trên máy tính.
-3. Tìm địa chỉ IPv4 của máy tính bằng lệnh `ipconfig`.
-4. Trên điện thoại, mở địa chỉ dạng `http://192.168.1.10:5500` rồi xoay ngang màn hình.
+- Dễ: thắng `+40.000`, thua `−10.000` token.
+- Siêu khó: thắng `+400.000`, thua `−100.000` token.
+- Bàn bạn bè không cộng hoặc trừ token.
 
-Hãy thay `192.168.1.10` bằng IPv4 thật của máy tính. Bản này có vùng an toàn cho máy có tai thỏ, nút điều khiển cảm ứng và thông báo xoay ngang màn hình.
+Số dư khởi đầu là `100.000` token và không thể xuống dưới 0.
 
-## Cấu trúc
+## Chạy thử
 
-- `index.html`: giao diện bàn chơi và các hộp thoại.
-- `manifest.webmanifest`: cấu hình hiển thị toàn màn hình và ưu tiên hướng ngang.
-- `css/style.css`: toàn bộ giao diện, lá bài và responsive.
-- `js/cards.js`: tạo, xáo, chia và sắp xếp bài.
-- `js/rules.js`: nhận diện bộ bài và so sánh nước đánh.
-- `js/bot.js`: tìm và chọn nước đi cho máy.
-- `js/ui.js`: hiển thị bàn chơi và xử lý giao diện.
-- `js/game.js`: điều khiển lượt, bỏ lượt và kết thúc ván.
+1. Mở thư mục bằng Visual Studio Code.
+2. Nhấn chuột phải `index.html`.
+3. Chọn **Open with Live Server**.
 
-Các thư mục trong `assets` được để sẵn cho ảnh và âm thanh khi nâng cấp game.
+## Đưa bản cập nhật lên GitHub
+
+Trong Terminal của repository, chạy:
+
+```powershell
+git add .
+git commit -m "Nang cap sanh game bai"
+git push origin master
+```
+
+GitHub Pages sẽ tự cập nhật sau khi lệnh `push` thành công.
+
+## Tệp chính
+
+- `index.html`: sảnh, bốn màn hình game và các hộp hướng dẫn.
+- `css/style.css`: giao diện, responsive, lá bài và khay bài đã chọn.
+- `js/portal.js`: điều hướng, ví token, độ khó và phần thưởng.
+- `js/game.js`, `js/ui.js`, `js/bot.js`: Tiến Lên với máy.
+- `js/spider.js`: luật và trạng thái Spider.
+- `js/freecell.js`: luật và trạng thái FreeCell.
+- `js/friends.js`: Tiến Lên chuyền thiết bị.
+
+Chế độ phòng online bằng mã chưa nằm trong bản GitHub Pages vì cần máy chủ để đồng bộ bài và lượt chơi.
