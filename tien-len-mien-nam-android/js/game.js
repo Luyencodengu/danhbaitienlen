@@ -22,6 +22,8 @@
         rankings: [],
         difficulty: "easy",
         rewardSettled: false,
+        dealSequence: 0,
+        playSequence: 0,
         players: createPlayers()
     };
 
@@ -64,6 +66,7 @@
         state.rankings = [];
         state.difficulty = difficulty || (app.Portal && app.Portal.getDifficulty ? app.Portal.getDifficulty() : "easy");
         state.rewardSettled = false;
+        state.dealSequence += 1;
 
         renderGame();
 
@@ -172,6 +175,7 @@
             cards: cards.slice().sort(Cards.compareCards),
             combo: combo
         };
+        state.playSequence += 1;
         state.roundOwner = playerId;
         state.firstMove = false;
         state.selectedCardIds.clear();

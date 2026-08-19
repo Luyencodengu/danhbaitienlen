@@ -18,8 +18,12 @@
         hintIds: new Set(),
         rankings: [],
         started: false,
-        overlayAction: "reveal"
+        overlayAction: "reveal",
+        dealSequence: 0,
+        playSequence: 0
     };
+    let renderedDealSequence = 0;
+    let renderedPlaySequence = 0;
 
     function showSetup() {
         state.started = false;
@@ -68,6 +72,7 @@
         state.hintIds.clear();
         state.rankings = [];
         state.started = true;
+        state.dealSequence += 1;
         document.getElementById("friendsSetup").hidden = true;
         document.getElementById("friendsGame").hidden = false;
         hidePrivateCards();
@@ -116,6 +121,10 @@
         document.getElementById("friendSelectedCount").textContent = selected.length;
         document.getElementById("friendPass").disabled = !state.tablePlay;
         renderTable();
+        if (state.dealSequence !== renderedDealSequence) {
+            renderedDealSequence = state.dealSequence;
+            animateFriendCards(document.getElementById("friendHand"), "card-deal-in");
+        }
     }
 
     function updateHints(player) {
@@ -130,9 +139,23 @@
     }
 
     function renderTable() {
-        document.getElementById("friendPlayedCards").innerHTML = state.tablePlay ? state.tablePlay.cards.map(function (card) {
+        const table = document.getElementById("friendPlayedCards");
+        table.innerHTML = state.tablePlay ? state.tablePlay.cards.map(function (card) {
             return UI.cardMarkup(card, { compact: true });
         }).join("") : "";
+        if (state.tablePlay && state.playSequence !== renderedPlaySequence) {
+            renderedPlaySequence = state.playSequence;
+            table.dataset.playOrigin = "0";
+            animateFriendCards(table, "card-play-in");
+        }
+    }
+
+    function animateFriendCards(container, className) {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        container.querySelectorAll(".playing-card").forEach(function (card, index) {
+            card.style.setProperty("--animation-index", index);
+            card.classList.add(className);
+        });
     }
 
     function toggleCard(cardId) {
@@ -174,7 +197,8 @@
             remaining[0].finished = true;
             remaining[0].rank = state.rankings.length + 1;
             state.rankings.push(remaining[0]);
-            showWinner();
+            state.started = false;
+            window.setTimeout(showWinner, 600);
             return true;
         }
         return false;
@@ -216,14 +240,20 @@
         player.hand = player.hand.filter(function (card) { return !ids.has(card.id); });
         clearPasses();
         state.tablePlay = { playerId: player.id, cards: cards.slice().sort(Cards.compareCards), combo: combo };
+        state.playSequence += 1;
         state.roundOwner = player.id;
         state.firstMove = false;
         state.selectedIds.clear();
+        renderTable();
         if (player.hand.length === 0 && finishPlayer(player)) {
             return;
         }
         state.currentPlayer = nextActive(player.id);
-        showPassOverlay();
+        document.getElementById("friendsGame").classList.add("play-animating");
+        window.setTimeout(function () {
+            document.getElementById("friendsGame").classList.remove("play-animating");
+            if (state.started) showPassOverlay();
+        }, 520);
     }
 
     function passTurn() {

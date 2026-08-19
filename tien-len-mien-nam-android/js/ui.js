@@ -7,6 +7,8 @@
     const elements = {};
     let handlers = {};
     let toastTimer = null;
+    let renderedDealSequence = 0;
+    let renderedPlaySequence = 0;
 
     function cacheElements() {
         elements.gameBoard = document.getElementById("gameBoard");
@@ -188,11 +190,36 @@
             }).join("");
             elements.tableMessage.textContent = state.tablePlay.combo.name;
             elements.lastPlayer.textContent = state.players[state.tablePlay.playerId].name + " vừa đánh";
+            if (state.playSequence && state.playSequence !== renderedPlaySequence) {
+                renderedPlaySequence = state.playSequence;
+                animatePlayedCards(elements.playedCards, state.tablePlay.playerId);
+            }
         } else {
             elements.playedCards.innerHTML = "";
             elements.tableMessage.textContent = state.started ? "Vòng mới – được đánh bộ bất kỳ" : "Nhấn “Bắt đầu chơi” để chia bài";
             elements.lastPlayer.textContent = "";
         }
+    }
+
+    function staggerCards(container, className) {
+        if (!container || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        container.querySelectorAll(".playing-card, .card-back").forEach(function (card, index) {
+            card.style.setProperty("--animation-index", index);
+            card.classList.add(className);
+        });
+    }
+
+    function animatePlayedCards(container, playerId) {
+        container.dataset.playOrigin = String(playerId);
+        staggerCards(container, "card-play-in");
+    }
+
+    function animateDeal(state) {
+        staggerCards(elements.humanHand, "card-deal-in");
+        state.players.forEach(function (player) {
+            const seat = document.getElementById("player" + player.id);
+            if (seat) staggerCards(seat.querySelector(".back-cards"), "card-deal-in");
+        });
     }
 
     function renderControls(state) {
@@ -222,6 +249,10 @@
         renderTable(state);
         renderControls(state);
         elements.gameBoard.classList.toggle("human-turn", state.currentPlayer === 0 && state.started && !state.gameOver);
+        if (state.dealSequence && state.dealSequence !== renderedDealSequence) {
+            renderedDealSequence = state.dealSequence;
+            animateDeal(state);
+        }
     }
 
     function toast(message, type) {
@@ -257,6 +288,9 @@
             elements.tokenResult.textContent = "";
         }
         openModal(elements.resultModal);
+        if (settlement && app.Portal && app.Portal.animateTokenResult) {
+            app.Portal.animateTokenResult(elements.tokenResult, settlement);
+        }
     }
 
     app.UI = {

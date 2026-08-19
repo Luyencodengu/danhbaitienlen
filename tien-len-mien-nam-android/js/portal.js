@@ -52,6 +52,7 @@
     let currentDifficulty = "easy";
     let selectedGame = null;
     let lastGenericGame = null;
+    const numberAnimations = new WeakMap();
 
     function readBalance() {
         const value = Number(localStorage.getItem(TOKEN_KEY));
@@ -69,6 +70,51 @@
     function updateWallets() {
         document.querySelectorAll(".token-value").forEach(function (element) {
             element.textContent = format(balance);
+        });
+    }
+
+    function animateNumber(element, from, to, duration, render) {
+        if (!element) return;
+        const previousFrame = numberAnimations.get(element);
+        if (previousFrame) window.cancelAnimationFrame(previousFrame);
+
+        const draw = render || function (value) { element.textContent = format(value); };
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            draw(to);
+            return;
+        }
+
+        const startedAt = performance.now();
+        element.classList.remove("token-counting");
+        void element.offsetWidth;
+        element.classList.add("token-counting");
+
+        function frame(now) {
+            const progress = Math.min(1, (now - startedAt) / (duration || 900));
+            const eased = 1 - Math.pow(1 - progress, 3);
+            draw(Math.round(from + (to - from) * eased));
+            if (progress < 1) {
+                numberAnimations.set(element, window.requestAnimationFrame(frame));
+            } else {
+                numberAnimations.delete(element);
+                window.setTimeout(function () { element.classList.remove("token-counting"); }, 350);
+            }
+        }
+
+        numberAnimations.set(element, window.requestAnimationFrame(frame));
+    }
+
+    function animateWallets(from) {
+        document.querySelectorAll(".token-value").forEach(function (element) {
+            animateNumber(element, Number(from) || 0, balance, 950);
+        });
+    }
+
+    function animateTokenResult(element, settlement) {
+        if (!element || !settlement) return;
+        const prefix = settlement.delta >= 0 ? "+" : "";
+        animateNumber(element, 0, settlement.delta, 1050, function (value) {
+            element.textContent = prefix + format(value) + " token • Số dư " + format(settlement.balance);
         });
     }
 
@@ -118,7 +164,7 @@
         }
         closeAllModals();
         showScreen("lobbyScreen");
-        updateWallets();
+        animateWallets(0);
     }
 
     function tutorialMarkup(steps) {
@@ -151,12 +197,15 @@
 
         if (selectedGame === "tienlen") {
             showScreen("tienLenScreen");
+            animateWallets(0);
             app.Game.start(currentDifficulty);
         } else if (selectedGame === "spider") {
             showScreen("spiderScreen");
+            animateWallets(0);
             app.Spider.start(currentDifficulty);
         } else if (selectedGame === "freecell") {
             showScreen("freecellScreen");
+            animateWallets(0);
             app.FreeCell.start(currentDifficulty);
         } else if (selectedGame === "friends") {
             showScreen("friendsScreen");
@@ -167,22 +216,24 @@
     function settleResult(won) {
         const rule = ECONOMY[currentDifficulty];
         const requestedDelta = won ? rule.reward : -rule.penalty;
+        const previousBalance = balance;
         const nextBalance = Math.max(0, balance + requestedDelta);
         const actualDelta = nextBalance - balance;
         balance = nextBalance;
         saveBalance();
-        updateWallets();
+        animateWallets(previousBalance);
         return { delta: actualDelta, balance: balance, won: won };
     }
 
     function settleRankResult(rank) {
         const rule = ECONOMY[currentDifficulty];
         const requestedDelta = rankDelta(rank, rule);
+        const previousBalance = balance;
         const nextBalance = Math.max(0, balance + requestedDelta);
         const actualDelta = nextBalance - balance;
         balance = nextBalance;
         saveBalance();
-        updateWallets();
+        animateWallets(previousBalance);
         return {
             delta: actualDelta, balance: balance, rank: rank, won: rank === 1,
             payouts: [1, 2, 3, 4].map(function (position) { return rankDelta(position, rule); })
@@ -207,6 +258,7 @@
         tokenBox.textContent = (settlement.delta >= 0 ? "+" : "") + format(settlement.delta) +
             " token • Số dư " + format(settlement.balance);
         openModal("genericResultModal");
+        animateTokenResult(tokenBox, settlement);
     }
 
     function replayGeneric() {
@@ -253,6 +305,7 @@
         settleRankResult: settleRankResult,
         getRankPayouts: function () { return [1, 2, 3, 4].map(function (rank) { return rankDelta(rank); }); },
         finishGeneric: finishGeneric,
+        animateTokenResult: animateTokenResult,
         showLobby: showLobby,
         toast: toast,
         format: format
