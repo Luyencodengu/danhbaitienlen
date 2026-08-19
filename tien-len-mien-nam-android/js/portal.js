@@ -175,6 +175,26 @@
         return { delta: actualDelta, balance: balance, won: won };
     }
 
+    function settleRankResult(rank) {
+        const rule = ECONOMY[currentDifficulty];
+        const requestedDelta = rankDelta(rank, rule);
+        const nextBalance = Math.max(0, balance + requestedDelta);
+        const actualDelta = nextBalance - balance;
+        balance = nextBalance;
+        saveBalance();
+        updateWallets();
+        return {
+            delta: actualDelta, balance: balance, rank: rank, won: rank === 1,
+            payouts: [1, 2, 3, 4].map(function (position) { return rankDelta(position, rule); })
+        };
+    }
+
+    function rankDelta(rank, rule) {
+        const economy = rule || ECONOMY[currentDifficulty];
+        return rank === 1 ? economy.reward : rank === 2 ? Math.round(economy.reward * 0.5) :
+            rank === 3 ? -Math.round(economy.penalty * 0.5) : -economy.penalty;
+    }
+
     function finishGeneric(game, won, message) {
         const settlement = settleResult(won);
         lastGenericGame = game;
@@ -230,6 +250,8 @@
         getDifficulty: function () { return currentDifficulty; },
         getBalance: function () { return balance; },
         settleResult: settleResult,
+        settleRankResult: settleRankResult,
+        getRankPayouts: function () { return [1, 2, 3, 4].map(function (rank) { return rankDelta(rank); }); },
         finishGeneric: finishGeneric,
         showLobby: showLobby,
         toast: toast,

@@ -40,31 +40,27 @@
 
         <section class="game-grid" aria-label="Danh sách trò chơi">
             <button class="game-tile tile-tienlen" type="button" data-game="tienlen">
-                <span class="game-number">01</span>
                 <span class="game-art art-tienlen" aria-hidden="true"><i>3♠</i><i>A♥</i><i>2♦</i></span>
                 <span class="tile-content"><small>TRÒ CHƠI VIỆT NAM</small><strong>Tiến Lên<br>Miền Nam</strong><em>1 người đấu 3 máy</em></span>
-                <span class="play-arrow">Chơi ngay <b>→</b></span>
+                <span class="play-arrow">Chơi ngay</span>
             </button>
 
             <button class="game-tile tile-spider" type="button" data-game="spider">
-                <span class="game-number">02</span>
                 <span class="game-art spider-web" aria-hidden="true">♠</span>
                 <span class="tile-content"><small>XẾP BÀI CỔ ĐIỂN</small><strong>Spider<br>Solitaire</strong><em>Hoàn thành 8 bộ K → A</em></span>
-                <span class="play-arrow">Chơi ngay <b>→</b></span>
+                <span class="play-arrow">Chơi ngay</span>
             </button>
 
             <button class="game-tile tile-freecell" type="button" data-game="freecell">
-                <span class="game-number">03</span>
                 <span class="game-art freecell-art" aria-hidden="true"><i>K♣</i><i>Q♦</i></span>
                 <span class="tile-content"><small>THỬ THÁCH CHIẾN THUẬT</small><strong>FreeCell<br>Solitaire</strong><em>Đưa 52 lá lên nền móng</em></span>
-                <span class="play-arrow">Chơi ngay <b>→</b></span>
+                <span class="play-arrow">Chơi ngay</span>
             </button>
 
             <button class="game-tile tile-friends" type="button" data-game="friends">
-                <span class="game-number">04</span>
                 <span class="game-art friends-art" aria-hidden="true"><i>NL</i><i>AN</i><i>BN</i></span>
                 <span class="tile-content"><small>KHÔNG TÍNH TOKEN</small><strong>Chơi Cùng<br>Bạn Bè</strong><em>Chuyền thiết bị • 2–4 người</em></span>
-                <span class="play-arrow">Tạo bàn <b>→</b></span>
+                <span class="play-arrow">Tạo bàn</span>
             </button>
         </section>
     </main>
@@ -73,7 +69,7 @@
         <div class="app-shell">
             <header class="topbar">
                 <div class="brand">
-                    <button class="back-lobby icon-button" type="button" aria-label="Về sảnh">←</button>
+                    <button class="back-lobby icon-button" type="button" aria-label="Thoát về sảnh"><span aria-hidden="true">‹</span><em>Thoát</em></button>
                     <span class="brand-suits" aria-hidden="true">♠</span>
                     <div><strong>TIẾN LÊN</strong><small>MIỀN NAM</small></div>
                 </div>
@@ -120,7 +116,7 @@
 
     <section id="spiderScreen" class="page-screen solitaire-screen" aria-label="Spider Solitaire">
         <header class="solitaire-header">
-            <div class="screen-title"><button class="back-lobby icon-button" type="button">←</button><span class="suit-logo">♠</span><div><strong>SPIDER</strong><small>SOLITAIRE</small></div></div>
+            <div class="screen-title"><button class="back-lobby icon-button" type="button" aria-label="Thoát về sảnh"><span aria-hidden="true">‹</span><em>Thoát</em></button><span class="suit-logo">♠</span><div><strong>SPIDER</strong><small>SOLITAIRE</small></div></div>
             <div class="solitaire-stats"><span class="difficulty-badge">Dễ</span><span>Nước đi <b id="spiderMoves">0</b></span><span>Đã xếp <b id="spiderCompleted">0/8</b></span><span class="mini-wallet"><b>T</b><span class="token-value">100.000</span></span><button id="spiderRestart" class="secondary-button" type="button">Chơi lại</button></div>
         </header>
         <div class="solitaire-board spider-board">
@@ -133,7 +129,7 @@
 
     <section id="freecellScreen" class="page-screen solitaire-screen" aria-label="FreeCell Solitaire">
         <header class="solitaire-header">
-            <div class="screen-title"><button class="back-lobby icon-button" type="button">←</button><span class="suit-logo red-logo">♦</span><div><strong>FREECELL</strong><small>SOLITAIRE</small></div></div>
+            <div class="screen-title"><button class="back-lobby icon-button" type="button" aria-label="Thoát về sảnh"><span aria-hidden="true">‹</span><em>Thoát</em></button><span class="suit-logo red-logo">♦</span><div><strong>FREECELL</strong><small>SOLITAIRE</small></div></div>
             <div class="solitaire-stats"><span class="difficulty-badge">Dễ</span><span>Nước đi <b id="freecellMoves">0</b></span><span class="mini-wallet"><b>T</b><span class="token-value">100.000</span></span><button id="freecellRestart" class="secondary-button" type="button">Chơi lại</button></div>
         </header>
         <div class="solitaire-board freecell-board">
@@ -148,8 +144,8 @@
 
     <section id="friendsScreen" class="page-screen friends-screen" aria-label="Chơi cùng bạn bè">
         <header class="solitaire-header">
-            <div class="screen-title"><button class="back-lobby icon-button" type="button">←</button><span class="suit-logo friends-logo">☺</span><div><strong>BÀN BẠN BÈ</strong><small>KHÔNG TÍNH TOKEN</small></div></div>
-            <button id="friendsNewGame" class="secondary-button" type="button">Tạo bàn mới</button>
+            <div class="screen-title"><button class="back-lobby icon-button" type="button" aria-label="Thoát về sảnh"><span aria-hidden="true">‹</span><em>Thoát</em></button><span class="suit-logo friends-logo">☺</span><div><strong>BÀN BẠN BÈ</strong><small>KHÔNG TÍNH TOKEN</small></div></div>
+            <div class="topbar-actions"><button id="friendRules" class="icon-button" type="button" aria-label="Xem luật chơi">?</button><button id="friendsNewGame" class="secondary-button" type="button">Tạo bàn mới</button></div>
         </header>
         <div id="friendsSetup" class="friends-setup">
             <p class="lobby-kicker">CHƠI CÙNG THIẾT BỊ</p><h2>Tạo bàn Tiến Lên</h2>
@@ -164,7 +160,7 @@
             <div id="friendPlayedCards" class="friend-played-cards"></div>
             <div id="friendSelectedTray" class="selected-tray friend-selected-tray"><span>Bài đã chọn</span></div>
             <div id="friendHand" class="human-hand friend-hand"></div>
-            <div class="friend-controls"><button id="friendPass" class="control-button pass-button" type="button">Bỏ lượt</button><button id="friendPlay" class="control-button play-button" type="button">Đánh bài <span id="friendSelectedCount">0</span></button></div>
+            <div class="friend-controls"><button id="friendSort" class="control-button sort-button" type="button">Sắp xếp</button><button id="friendPass" class="control-button pass-button" type="button">Bỏ lượt</button><button id="friendPlay" class="control-button play-button" type="button">Đánh bài <span id="friendSelectedCount">0</span></button></div>
         </div>
     </section>
 
@@ -192,7 +188,7 @@
         <div class="modal-card rules-card">
             <button id="closeRulesButton" class="modal-close" type="button">×</button>
             <p class="eyebrow">HƯỚNG DẪN</p><h2 id="rulesTitle">Luật Tiến Lên đang áp dụng</h2>
-            <div class="rules-grid"><div><strong>Bộ hợp lệ</strong><span>Lẻ, đôi, sám cô, sảnh từ 3 lá, tứ quý và 3–4 đôi thông.</span></div><div><strong>Thứ tự chất</strong><span>♠ Bích &lt; ♣ Tép &lt; ♦ Rô &lt; ♥ Cơ.</span></div><div><strong>Ván đầu</strong><span>Người giữ 3♠ đi trước và nước đầu phải chứa 3♠.</span></div><div><strong>Chặt 2</strong><span>Ba đôi thông chặt một 2; tứ quý và bốn đôi thông có thể chặt đôi 2.</span></div></div>
+            <div class="rules-grid"><div><strong>Bộ hợp lệ</strong><span>Lẻ, đôi, sám cô, sảnh từ 3 lá, tứ quý và 3–4 đôi thông.</span></div><div><strong>Thứ tự chất</strong><span>♠ Bích &lt; ♣ Tép &lt; ♦ Rô &lt; ♥ Cơ.</span></div><div><strong>Ván đầu</strong><span>Người giữ 3♠ đi trước và nước đầu phải chứa 3♠.</span></div><div><strong>Chặt 2</strong><span>Ba đôi thông chặt một 2; tứ quý và bốn đôi thông có thể chặt đôi 2.</span></div><div><strong>Thưởng theo hạng</strong><span>Hạng 1 nhận 100% thưởng; hạng 2 nhận 50%; hạng 3 chịu 50% mức phạt và hạng 4 chịu toàn bộ mức phạt.</span></div><div><strong>Gợi ý nước đi</strong><span>Khi đến lượt, bộ bài nên đánh sẽ tự động lấp lánh trên tay bạn.</span></div></div>
             <button id="understoodButton" class="primary-button" type="button">Đã hiểu</button>
         </div>
     </div>
@@ -203,6 +199,10 @@
 
     <div id="genericResultModal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-card result-card"><div id="genericResultIcon" class="result-icon">🏆</div><p class="eyebrow">KẾT THÚC</p><h2 id="genericResultTitle">Bạn chiến thắng!</h2><p id="genericResultMessage"></p><div id="genericTokenResult" class="token-result"></div><button id="genericPlayAgain" class="primary-button" type="button">Chơi lại</button><button class="text-button back-lobby" type="button">Về sảnh</button></div>
+    </div>
+
+    <div id="friendResultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="friendResultTitle">
+        <div class="modal-card result-card"><div class="result-icon">🏆</div><p class="eyebrow">KẾT QUẢ BÀN BẠN BÈ</p><h2 id="friendResultTitle">Kết quả</h2><div id="friendRankingList" class="ranking-list"></div><p class="friend-result-note">Token chỉ dùng để tính điểm trong ván này, không thay đổi số dư ví.</p><button id="friendResultNewGame" class="primary-button" type="button">Tạo bàn mới</button><button class="text-button back-lobby" type="button">Về sảnh</button></div>
     </div>
 
     <div id="passDeviceOverlay" class="pass-device-overlay" hidden><div><span class="pass-avatar">♠</span><p>Chuyền thiết bị cho</p><h2 id="passPlayerName">Người chơi</h2><button id="revealFriendHand" class="primary-button" type="button">Tôi đã sẵn sàng • Xem bài</button></div></div>

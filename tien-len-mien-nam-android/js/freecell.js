@@ -12,6 +12,8 @@
         difficulty: "easy",
         ended: false
     };
+    let drag = null;
+    let suppressClick = false;
 
     function rankLabel(rank) {
         return ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[rank] || String(rank);
@@ -55,17 +57,37 @@
         state.difficulty = difficulty || "easy";
         state.ended = false;
         render();
+        animateDeal("#freecellTableau .sol-card", 28);
+    }
+
+    function animateDeal(selector, step) {
+        document.querySelectorAll(selector).forEach(function (card, index) {
+            card.style.setProperty("--deal-delay", (index * step) + "ms");
+            card.classList.add("dealing");
+        });
+    }
+
+    function celebrateFoundation(card) {
+        const board = document.querySelector("#freecellScreen .solitaire-board");
+        const effect = document.createElement("div");
+        effect.className = "set-complete-fx";
+        effect.innerHTML = "<strong>HOÀN TẤT BỘ A → K " + SUITS[card.suit] + "</strong>" + Array.from({ length: 18 }, function (_, index) {
+            return "<i style=\"--star-angle:" + (index * 20) + "deg\">✦</i>";
+        }).join("");
+        board.appendChild(effect);
+        window.setTimeout(function () { effect.remove(); }, 1500);
     }
 
     function cardMarkup(card, attributes, selected, top) {
         return "<button class=\"sol-card " + (isRed(card) ? "red " : "") + (selected ? "selected" : "") +
             "\" type=\"button\" " + attributes + (top === undefined ? "" : " style=\"--card-top:" + top + "px\"") +
-            " aria-label=\"" + rankLabel(card.rank) + SUITS[card.suit] + "\"><span class=\"sol-rank\">" + rankLabel(card.rank) +
-            "</span><span class=\"sol-suit\">" + SUITS[card.suit] + "</span></button>";
+            " aria-label=\"" + rankLabel(card.rank) + SUITS[card.suit] + "\"><span class=\"sol-corner top\"><b>" + rankLabel(card.rank) +
+            "</b><i>" + SUITS[card.suit] + "</i></span><span class=\"sol-center-suit\">" + SUITS[card.suit] +
+            "</span><span class=\"sol-corner bottom\"><b>" + rankLabel(card.rank) + "</b><i>" + SUITS[card.suit] + "</i></span></button>";
     }
 
     function render() {
-        const cardGap = window.innerHeight < 650 ? 20 : 29;
+        const cardGap = window.innerHeight < 650 ? 28 : 36;
         document.getElementById("freecellTableau").innerHTML = state.columns.map(function (column, columnIndex) {
             const cards = column.map(function (card, cardIndex) {
                 const selected = state.selected && state.selected.type === "column" && state.selected.source === columnIndex && cardIndex >= state.selected.index;
@@ -219,6 +241,7 @@
         state.selected = null;
         state.moves += 1;
         render();
+        if (card.rank === 13) celebrateFoundation(card);
         checkEnd();
     }
 
@@ -273,6 +296,7 @@
     }
 
     document.getElementById("freecellTableau").addEventListener("click", function (event) {
+        if (suppressClick) { suppressClick = false; return; }
         if (state.ended) {
             return;
         }
@@ -289,7 +313,84 @@
         }
     });
 
+    function clearDragVisual() {
+        document.querySelectorAll(".drag-source, .drop-target").forEach(function (element) { element.classList.remove("drag-source", "drop-target"); });
+        const ghost = document.querySelector(".card-drag-ghost");
+        if (ghost) ghost.remove();
+    }
+
+    function beginPointerDrag(event, selection, elements) {
+        if (state.ended || event.button > 0) return;
+        drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, selection: selection, elements: elements, active: false };
+    }
+
+    document.getElementById("freecellScreen").addEventListener("pointerdown", function (event) {
+        const columnCard = event.target.closest("[data-free-col]");
+        const cellZone = event.target.closest("[data-free-cell]");
+        if (columnCard) {
+            const col = Number(columnCard.dataset.freeCol);
+            const index = Number(columnCard.dataset.freeIndex);
+            if (!validSequence(state.columns[col], index)) return;
+            const elements = Array.from(document.querySelectorAll("[data-free-col=\"" + col + "\"]")).slice(index);
+            beginPointerDrag(event, { type: "column", source: col, index: index }, elements);
+        } else if (cellZone && state.cells[Number(cellZone.dataset.freeCell)]) {
+            beginPointerDrag(event, { type: "cell", source: Number(cellZone.dataset.freeCell) }, [cellZone.querySelector(".sol-card")]);
+        }
+    });
+
+    window.addEventListener("pointermove", function (event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        if (!drag.active && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 7) return;
+        if (!drag.active) {
+            drag.active = true;
+            state.selected = drag.selection;
+            const ghost = document.createElement("div");
+            ghost.className = "card-drag-ghost";
+            drag.elements.forEach(function (element, offset) {
+                const clone = element.cloneNode(true);
+                clone.style.top = (offset * 29) + "px";
+                clone.style.setProperty("--card-top", "0px");
+                ghost.appendChild(clone);
+                element.classList.add("drag-source");
+            });
+            document.body.appendChild(ghost);
+        }
+        event.preventDefault();
+        const ghost = document.querySelector(".card-drag-ghost");
+        if (ghost) ghost.style.transform = "translate(" + (event.clientX + 10) + "px," + (event.clientY + 10) + "px)";
+        document.querySelectorAll(".drop-target").forEach(function (element) { element.classList.remove("drop-target"); });
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const zone = target && target.closest("[data-free-column], [data-free-cell], [data-foundation]");
+        if (zone) zone.classList.add("drop-target");
+    }, { passive: false });
+
+    window.addEventListener("pointerup", function (event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const source = drag;
+        drag = null;
+        if (!source.active) return;
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const zone = target && target.closest("[data-free-column], [data-free-cell], [data-foundation]");
+        clearDragVisual();
+        suppressClick = true;
+        window.setTimeout(function () { suppressClick = false; }, 0);
+        state.selected = source.selection;
+        if (!zone) { state.selected = null; render(); return; }
+        if (zone.hasAttribute("data-free-column")) moveToColumn(Number(zone.dataset.freeColumn));
+        else if (zone.hasAttribute("data-free-cell")) moveToCell(Number(zone.dataset.freeCell));
+        else moveToFoundation(Number(zone.dataset.foundation));
+    });
+
+    window.addEventListener("pointercancel", function () {
+        if (!drag) return;
+        drag = null;
+        clearDragVisual();
+        state.selected = null;
+        render();
+    });
+
     document.getElementById("freeCells").addEventListener("click", function (event) {
+        if (suppressClick) { suppressClick = false; return; }
         const zone = event.target.closest("[data-free-cell]");
         if (zone && !state.ended) {
             if (!state.selected && state.cells[Number(zone.dataset.freeCell)]) {
@@ -301,6 +402,7 @@
     });
 
     document.getElementById("freeFoundations").addEventListener("click", function (event) {
+        if (suppressClick) { suppressClick = false; return; }
         const zone = event.target.closest("[data-foundation]");
         if (zone && state.selected && !state.ended) {
             moveToFoundation(Number(zone.dataset.foundation));

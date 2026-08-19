@@ -506,6 +506,33 @@ button.playing-card:disabled {
     filter: brightness(0.88);
 }
 
+button.playing-card.hint:not(:disabled) {
+    z-index: 4;
+    border-color: #ffe171;
+    animation: hint-card-glow 1.15s ease-in-out infinite;
+}
+
+button.playing-card.hint:not(:disabled)::after {
+    position: absolute;
+    inset: -55% -90%;
+    background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.92) 50%, transparent 58%);
+    content: "";
+    transform: translateX(-42%) rotate(8deg);
+    animation: hint-card-shine 1.6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes hint-card-glow {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(255,214,75,.35), 0 6px 12px rgba(0,0,0,.27); filter: brightness(1); }
+    50% { box-shadow: 0 0 7px 4px rgba(255,225,92,.95), 0 0 18px 7px rgba(255,177,35,.48); filter: brightness(1.1); }
+}
+
+@keyframes hint-card-shine {
+    0%, 28% { transform: translateX(-55%) rotate(8deg); opacity: 0; }
+    45% { opacity: 1; }
+    70%, 100% { transform: translateX(55%) rotate(8deg); opacity: 0; }
+}
+
 .playing-card.red { color: #c52631; }
 .playing-card.black { color: #171d1a; }
 
@@ -779,7 +806,8 @@ button.playing-card:disabled {
 }
 
 .ranking-item strong { color: #173b30; }
-.ranking-item > span:last-child { font-size: 10px; }
+.ranking-item > span:last-child { font-size: 10px; font-weight: 750; white-space: nowrap; }
+.friend-result-note { margin: -12px 0 15px; color: #74807b; font-size: 10px; }
 .medal { font-size: 20px; }
 
 .toast {
@@ -1137,38 +1165,73 @@ body:not(.in-game) {
     padding: clamp(42px, 7vh, 90px) 0 clamp(26px, 4vh, 48px);
 }
 
+.lobby-hero > div:first-child {
+    position: relative;
+    max-width: 590px;
+    padding: clamp(15px, 2vw, 23px) clamp(18px, 2.6vw, 30px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 232, 164, .16);
+    border-left: 4px solid #f2c95e;
+    border-radius: 8px 28px 28px 8px;
+    background: linear-gradient(110deg, rgba(1, 20, 16, .88), rgba(4, 45, 35, .56));
+    box-shadow: 0 24px 58px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .06);
+    backdrop-filter: blur(13px);
+}
+
+.lobby-hero > div:first-child::after {
+    position: absolute;
+    top: -90px;
+    right: -75px;
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(242, 201, 94, .14);
+    border-radius: 50%;
+    box-shadow: 0 0 0 34px rgba(242, 201, 94, .035), 0 0 0 68px rgba(242, 201, 94, .025);
+    content: "";
+    pointer-events: none;
+}
+
 .lobby-kicker {
     margin: 0 0 13px;
-    color: #e2be57;
-    font-size: 10px;
-    font-weight: 800;
+    color: #ffe58f;
+    font-size: 11px;
+    font-weight: 900;
     letter-spacing: 0.19em;
+    text-shadow: 0 2px 12px rgba(239, 193, 71, .34);
 }
 
 .lobby-hero h1 {
     margin: 0;
-    font-size: clamp(36px, 5vw, 72px);
+    font-size: clamp(32px, 4.15vw, 58px);
     font-weight: 760;
     letter-spacing: -0.045em;
     line-height: 0.98;
+    color: #fffdf4;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, .55);
 }
 
-.lobby-hero h1 span { color: #efc75f; font-family: Georgia, "Times New Roman", serif; font-style: italic; }
-.lobby-hero > div > p:last-child { max-width: 610px; margin: 23px 0 0; color: rgba(255, 255, 255, 0.62); font-size: 13px; line-height: 1.7; }
+.lobby-hero h1 span {
+    color: #ffd86b;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    text-shadow: 0 3px 18px rgba(246, 185, 48, .3);
+}
+.lobby-hero > div > p:last-child { max-width: 520px; margin: 15px 0 0; color: rgba(255, 255, 255, 0.86); font-size: 12px; font-weight: 520; line-height: 1.65; text-shadow: 0 2px 8px rgba(0,0,0,.42); }
 
 .reward-summary {
     display: grid;
     min-width: 220px;
     gap: 8px;
     padding: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 222, 128, 0.27);
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(145deg, rgba(255, 221, 118, .13), rgba(3, 31, 24, .76));
+    box-shadow: 0 18px 38px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.08);
     backdrop-filter: blur(10px);
 }
 
-.reward-summary > span { margin-bottom: 4px; color: rgba(255, 255, 255, 0.5); font-size: 9px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
-.reward-summary strong { display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
+.reward-summary > span { margin-bottom: 4px; color: #fff1bd; font-size: 9px; font-weight: 850; letter-spacing: 0.12em; text-transform: uppercase; }
+.reward-summary strong { display: flex; align-items: center; justify-content: space-between; color: #fff; font-size: 11px; }
 .reward-summary b { color: #ffd96f; font-size: 17px; }
 
 .game-grid {
@@ -1200,7 +1263,7 @@ body:not(.in-game) {
 .game-tile::after {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 25%, rgba(0, 0, 0, 0.7) 100%);
+    background: linear-gradient(180deg, transparent 20%, rgba(0, 0, 0, .22) 45%, rgba(0, 0, 0, .88) 100%);
     content: "";
 }
 
@@ -1216,17 +1279,6 @@ body:not(.in-game) {
 .tile-spider { background: radial-gradient(circle at 50% 25%, #363c72, transparent 49%), #181b3d; }
 .tile-freecell { background: radial-gradient(circle at 50% 20%, #a3533e, transparent 48%), #4d241f; }
 .tile-friends { background: radial-gradient(circle at 50% 22%, #876027, transparent 48%), #423014; }
-
-.game-number {
-    position: absolute;
-    z-index: 3;
-    top: 22px;
-    left: 23px;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-}
 
 .game-art {
     position: absolute;
@@ -1270,14 +1322,20 @@ body:not(.in-game) {
 
 .tile-content,
 .play-arrow { position: relative; z-index: 3; }
+.tile-content { width: calc(100% + 8px); margin: 0 -4px; padding: 8px 11px 7px; border-left: 3px solid rgba(255, 218, 105, .82); border-radius: 4px 10px 10px 4px; background: rgba(5, 17, 14, .72); box-shadow: 0 7px 18px rgba(0,0,0,.18); }
 .tile-content small,
 .tile-content strong,
 .tile-content em { display: block; }
-.tile-content small { margin-bottom: 9px; color: #e6c463; font-size: 8px; font-weight: 850; letter-spacing: 0.14em; }
-.tile-content strong { font-size: clamp(23px, 2.1vw, 34px); letter-spacing: -0.03em; line-height: 1; }
-.tile-content em { margin-top: 10px; color: rgba(255, 255, 255, 0.58); font-size: 10px; font-style: normal; }
-.play-arrow { display: flex; width: 100%; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.13); color: rgba(255, 255, 255, 0.72); font-size: 10px; font-weight: 750; }
-.play-arrow b { color: #f2cf70; font-size: 20px; }
+.tile-content small { margin-bottom: 5px; color: #ffe286; font-size: 8px; font-weight: 900; letter-spacing: 0.14em; text-shadow: 0 2px 7px rgba(0,0,0,.65); }
+.tile-content strong { color: #fffef8; font-size: clamp(23px, 2.1vw, 34px); font-weight: 850; letter-spacing: -0.03em; line-height: 1; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+.tile-content em { margin-top: 6px; color: rgba(255, 255, 255, 0.86); font-size: 10px; font-style: normal; font-weight: 600; }
+.play-arrow { display: inline-flex; width: auto; min-width: 116px; min-height: 38px; align-self: center; align-items: center; justify-content: center; margin-top: 12px; padding: 8px 18px; border: 1px solid rgba(255, 232, 155, .72); border-radius: 999px; color: #28301b; background: linear-gradient(135deg, #ffe99a, #dca936); box-shadow: 0 8px 18px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.55); font-size: 10px; font-weight: 900; letter-spacing: .04em; text-align: center; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease; }
+.play-arrow:hover {
+    border-color: #fff2b0;
+    background: linear-gradient(135deg, #fff6c9, #f0c751);
+    box-shadow: 0 0 8px 3px rgba(255, 225, 111, .78), 0 0 24px 7px rgba(244, 174, 42, .42), inset 0 1px rgba(255,255,255,.8);
+    transform: translateY(-2px) scale(1.04);
+}
 
 .difficulty-badge {
     padding: 7px 10px;
@@ -1383,6 +1441,10 @@ body:not(.in-game) {
 .screen-title,
 .solitaire-stats { display: flex; align-items: center; gap: 10px; }
 .screen-title .icon-button { margin-right: 4px; }
+.back-lobby.icon-button { display: inline-flex; width: auto; min-width: 76px; padding: 0 13px 0 9px; align-items: center; justify-content: center; gap: 5px; border-color: rgba(255, 218, 111, .34); border-radius: 999px; background: linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,205,72,.08)); box-shadow: inset 0 1px rgba(255,255,255,.08), 0 5px 14px rgba(0,0,0,.2); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+.back-lobby.icon-button span { color: #ffe38a; font-family: Georgia, serif; font-size: 29px; font-weight: 400; line-height: 0; transform: translateY(-1px); }
+.back-lobby.icon-button em { color: #fff7db; font-size: 10px; font-style: normal; font-weight: 850; letter-spacing: .03em; }
+.back-lobby.icon-button:hover { background: linear-gradient(135deg, rgba(255,229,143,.22), rgba(218,158,37,.18)); box-shadow: 0 0 14px rgba(255,207,74,.28), 0 7px 16px rgba(0,0,0,.25); transform: translateX(-2px); }
 .screen-title strong,
 .screen-title small { display: block; letter-spacing: 0.12em; }
 .screen-title strong { font-size: 13px; }
@@ -1421,17 +1483,23 @@ body:not(.in-game) {
     border-radius: 8px;
     color: #171c19;
     background: linear-gradient(145deg, #fffefa, #e9e4da);
-    box-shadow: 0 5px 9px rgba(0, 0, 0, 0.26);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.72), 0 5px 9px rgba(0, 0, 0, 0.26);
     text-align: left;
     cursor: pointer;
     transform: translateX(-50%);
     transition: box-shadow 0.14s ease, margin 0.14s ease;
+    touch-action: none;
+    user-select: none;
 }
 
 .sol-card.red { color: #c32731; }
 .sol-card.selected { z-index: 30; box-shadow: 0 0 0 3px #ffd763, 0 11px 18px rgba(0, 0, 0, 0.38); }
-.sol-card .sol-rank { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 20px; font-weight: 800; line-height: 0.92; }
-.sol-card .sol-suit { font-size: 17px; }
+.sol-corner { position: absolute; z-index: 2; display: flex; width: 20px; align-items: center; flex-direction: column; font-family: Georgia, "Times New Roman", serif; line-height: .88; }
+.sol-corner.top { top: 6px; left: 5px; }
+.sol-corner.bottom { right: 5px; bottom: 6px; transform: rotate(180deg); }
+.sol-corner b { font-size: 19px; font-weight: 800; }
+.sol-corner i { margin-top: 3px; font-size: 14px; font-style: normal; }
+.sol-center-suit { position: absolute; inset: 0; display: grid; place-items: center; font-family: Georgia, serif; font-size: 38px; opacity: .92; }
 .sol-card.face-down { border-color: #f2dbad; background: repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0 2px, transparent 2px 7px), #95263a; }
 .sol-card.face-down::after { position: absolute; inset: 6px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 4px; content: ""; }
 .spider-foundations { position: absolute; z-index: 4; top: 14px; right: 20px; display: flex; gap: 5px; }
@@ -1454,6 +1522,27 @@ body:not(.in-game) {
 .free-zone .sol-card .sol-rank { font-size: 16px; }
 .free-zone .sol-card .sol-suit { font-size: 14px; }
 .free-zone .foundation-symbol { display: grid; width: 100%; height: 100%; place-items: center; color: rgba(255,255,255,.2); font-family: Georgia, serif; font-size: 24px; }
+.free-zone .sol-corner.bottom { display: none; }
+.free-zone .sol-center-suit { font-size: 25px; }
+.free-zone .sol-corner b { font-size: 15px; }
+.free-zone .sol-corner i { font-size: 11px; }
+.drag-source { opacity: .28; }
+.card-drag-ghost { position: fixed; z-index: 1000; top: 0; left: 0; width: 82px; pointer-events: none; filter: drop-shadow(0 13px 12px rgba(0,0,0,.4)); }
+.card-drag-ghost .sol-card { left: 0; width: 82px; transform: none; }
+.drop-target { outline: 3px solid rgba(255, 220, 105, .9) !important; outline-offset: -3px; background: rgba(255, 220, 105, .09); }
+.sol-card.dealing { animation: solitaire-deal .5s cubic-bezier(.2,.8,.25,1) both; animation-delay: var(--deal-delay, 0ms); }
+@keyframes solitaire-deal {
+    0% { opacity: 0; transform: translate(-170%, -85px) rotate(-12deg) scale(.72); }
+    70% { opacity: 1; transform: translateX(-50%) rotate(2deg) scale(1.03); }
+    100% { opacity: 1; transform: translateX(-50%) rotate(0) scale(1); }
+}
+.set-complete-fx { position: absolute; z-index: 90; inset: 0; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle, rgba(255,221,99,.18), transparent 45%); pointer-events: none; animation: complete-fx-fade 1.45s ease both; }
+.set-complete-fx strong { padding: 12px 22px; border: 1px solid rgba(255,239,173,.72); border-radius: 999px; color: #fff7c9; background: rgba(4,44,32,.9); box-shadow: 0 0 22px rgba(255,213,70,.65); font-size: clamp(15px, 2vw, 23px); letter-spacing: .06em; animation: complete-fx-title .8s cubic-bezier(.2,.9,.25,1) both; }
+.set-complete-fx i { position: absolute; left: 50%; top: 50%; color: #ffe477; font-size: 20px; font-style: normal; text-shadow: 0 0 10px #ffbc32; animation: complete-star 1.25s ease-out both; transform: rotate(var(--star-angle)) translateY(-25px); }
+@keyframes complete-fx-title { 0% { opacity: 0; transform: scale(.45); } 55% { opacity: 1; transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes complete-star { 0% { opacity: 0; transform: rotate(var(--star-angle)) translateY(-20px) scale(.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--star-angle)) translateY(-210px) scale(1.25); } }
+@keyframes complete-fx-fade { 0%, 72% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sol-card.dealing, .set-complete-fx, .set-complete-fx strong, .set-complete-fx i { animation-duration: .01ms !important; animation-delay: 0ms !important; } }
 
 /* =========================================================
    CHƠI CÙNG BẠN BÈ – CÙNG THIẾT BỊ
@@ -1511,8 +1600,9 @@ body:not(.in-game) {
     .solitaire-board { min-height: calc(100dvh - 52px); padding-top: 8px; }
     .spider-tableau { padding-top: 48px; }
     .sol-card { height: 86px; }
-    .sol-card .sol-rank { font-size: 15px; }
-    .sol-card .sol-suit { font-size: 13px; }
+    .sol-corner b { font-size: 15px; }
+    .sol-corner i { font-size: 11px; }
+    .sol-center-suit { font-size: 29px; }
     .solitaire-column { min-height: 300px; }
     .free-zone { width: 45px; height: 61px; }
     .free-zone .sol-card { width: 45px; height: 61px; }

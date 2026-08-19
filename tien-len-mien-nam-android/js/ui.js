@@ -91,6 +91,7 @@
         const suit = Cards.getSuit(card.suit);
         const selectedClass = settings.selected ? " selected" : "";
         const compactClass = settings.compact ? " compact" : "";
+        const hintClass = settings.hint ? " hint" : "";
         const disabled = settings.disabled ? " disabled" : "";
         const dataAttribute = settings.clickable ? " data-card-id=\"" + card.id + "\"" : "";
         const tag = settings.clickable ? "button" : "div";
@@ -98,7 +99,7 @@
         const label = Cards.cardName(card);
 
         return "<" + tag + type + dataAttribute + disabled +
-            " class=\"playing-card " + suit.color + selectedClass + compactClass + "\"" +
+            " class=\"playing-card " + suit.color + selectedClass + compactClass + hintClass + "\"" +
             " aria-label=\"" + label + (settings.selected ? ", đã chọn" : "") + "\">" +
             "<span class=\"card-corner top\"><strong>" + Cards.rankLabel(card.rank) + "</strong><i>" + suit.symbol + "</i></span>" +
             "<span class=\"card-suit\">" + suit.symbol + "</span>" +
@@ -164,6 +165,7 @@
             return cardMarkup(card, {
                 clickable: true,
                 selected: false,
+                hint: state.hintCardIds && state.hintCardIds.has(card.id),
                 disabled: disabled
             });
         }).join("");
@@ -238,10 +240,11 @@
         elements.resultIcon.textContent = humanRank === 1 ? "🏆" : humanRank === 2 ? "🎉" : "🎴";
         elements.resultTitle.textContent = humanRank === 1 ? "Bạn chiến thắng!" : "Bạn về hạng " + humanRank;
         elements.rankingList.innerHTML = rankings.map(function (player, index) {
+            const payout = settlement && settlement.payouts ? settlement.payouts[index] : null;
             return "<div class=\"ranking-item" + (player.id === 0 ? " human" : "") + "\">" +
                 "<span class=\"medal\">" + medals[index] + "</span>" +
                 "<strong>" + player.name + "</strong>" +
-                "<span>Hạng " + (index + 1) + "</span>" +
+                "<span>Hạng " + (index + 1) + (payout === null ? "" : " • " + (payout >= 0 ? "+" : "") + payout.toLocaleString("vi-VN") + " token") + "</span>" +
                 "</div>";
         }).join("");
 

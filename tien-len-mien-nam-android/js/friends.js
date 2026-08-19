@@ -4,6 +4,7 @@
     const app = window.TienLen = window.TienLen || {};
     const Cards = app.Cards;
     const Rules = app.Rules;
+    const Bot = app.Bot;
     const UI = app.UI;
     const state = {
         playerCount: 4,
@@ -14,6 +15,7 @@
         firstMove: true,
         passedIds: new Set(),
         selectedIds: new Set(),
+        hintIds: new Set(),
         rankings: [],
         started: false,
         overlayAction: "reveal"
@@ -63,6 +65,7 @@
         state.firstMove = true;
         state.passedIds.clear();
         state.selectedIds.clear();
+        state.hintIds.clear();
         state.rankings = [];
         state.started = true;
         document.getElementById("friendsSetup").hidden = true;
@@ -101,10 +104,11 @@
         const player = state.players[state.currentPlayer];
         const selected = player.hand.filter(function (card) { return state.selectedIds.has(card.id); });
         const remaining = player.hand.filter(function (card) { return !state.selectedIds.has(card.id); });
+        updateHints(player);
         document.getElementById("friendTurnName").textContent = "Lượt của " + player.name + " • " + player.hand.length + " lá";
         document.getElementById("friendTableInfo").textContent = state.tablePlay ? state.tablePlay.combo.name + " • " + state.players[state.tablePlay.playerId].name + " vừa đánh" : "Vòng mới – được đánh bộ bất kỳ";
         document.getElementById("friendHand").innerHTML = remaining.map(function (card) {
-            return UI.cardMarkup(card, { clickable: true });
+            return UI.cardMarkup(card, { clickable: true, hint: state.hintIds.has(card.id) });
         }).join("");
         document.getElementById("friendSelectedTray").innerHTML = selected.length ? selected.map(function (card) {
             return UI.cardMarkup(card, { clickable: true });
@@ -112,6 +116,17 @@
         document.getElementById("friendSelectedCount").textContent = selected.length;
         document.getElementById("friendPass").disabled = !state.tablePlay;
         renderTable();
+    }
+
+    function updateHints(player) {
+        state.hintIds.clear();
+        if (state.selectedIds.size) return;
+        const move = Bot.chooseMove(player.hand, state.tablePlay ? state.tablePlay.combo : null, {
+            requiredCardId: state.firstMove ? "3-0" : null,
+            opponents: state.players.filter(function (item) { return item.id !== player.id; }),
+            difficulty: "hard"
+        });
+        if (move) move.cards.forEach(function (card) { state.hintIds.add(card.id); });
     }
 
     function renderTable() {
@@ -168,10 +183,17 @@
     function showWinner() {
         state.started = false;
         hidePrivateCards();
-        state.overlayAction = "setup";
-        document.getElementById("passPlayerName").textContent = state.rankings[0].name + " chiến thắng!";
-        document.getElementById("revealFriendHand").textContent = "Về tạo bàn mới";
-        document.getElementById("passDeviceOverlay").hidden = false;
+        document.getElementById("passDeviceOverlay").hidden = true;
+        const payouts = [40000, 20000, -5000, -10000];
+        const medals = ["🥇", "🥈", "🥉", "4"];
+        document.getElementById("friendResultTitle").textContent = state.rankings[0].name + " chiến thắng!";
+        document.getElementById("friendRankingList").innerHTML = state.rankings.map(function (player, index) {
+            const payout = payouts[index];
+            return "<div class=\"ranking-item\"><span class=\"medal\">" + medals[index] + "</span><strong>" +
+                player.name + "</strong><span>Hạng " + (index + 1) + " • " + (payout >= 0 ? "+" : "") +
+                payout.toLocaleString("vi-VN") + " token</span></div>";
+        }).join("");
+        UI.openModal(document.getElementById("friendResultModal"));
     }
 
     function playCards() {
@@ -227,6 +249,12 @@
         showPassOverlay();
     }
 
+    function sortCurrentHand() {
+        if (!state.started) return;
+        Cards.sortCards(state.players[state.currentPlayer].hand);
+        render();
+    }
+
     document.querySelectorAll("[data-count]").forEach(function (button) {
         button.addEventListener("click", function () {
             state.playerCount = Number(button.dataset.count);
@@ -249,6 +277,12 @@
     document.getElementById("startFriendsButton").addEventListener("click", startGame);
     document.getElementById("friendPlay").addEventListener("click", playCards);
     document.getElementById("friendPass").addEventListener("click", passTurn);
+    document.getElementById("friendSort").addEventListener("click", sortCurrentHand);
+    document.getElementById("friendRules").addEventListener("click", function () { UI.openModal(document.getElementById("rulesModal")); });
+    document.getElementById("friendResultNewGame").addEventListener("click", function () {
+        UI.closeModal(document.getElementById("friendResultModal"));
+        showSetup();
+    });
     document.getElementById("revealFriendHand").addEventListener("click", revealHand);
     document.getElementById("friendsNewGame").addEventListener("click", showSetup);
 

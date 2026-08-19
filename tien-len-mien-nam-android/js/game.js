@@ -17,6 +17,7 @@
         roundOwner: null,
         tablePlay: null,
         selectedCardIds: new Set(),
+        hintCardIds: new Set(),
         passedPlayerIds: new Set(),
         rankings: [],
         difficulty: "easy",
@@ -58,12 +59,13 @@
         state.roundOwner = null;
         state.tablePlay = null;
         state.selectedCardIds.clear();
+        state.hintCardIds.clear();
         state.passedPlayerIds.clear();
         state.rankings = [];
         state.difficulty = difficulty || (app.Portal && app.Portal.getDifficulty ? app.Portal.getDifficulty() : "easy");
         state.rewardSettled = false;
 
-        UI.render(state);
+        renderGame();
 
         if (state.currentPlayer === 0) {
             UI.toast("Bạn có 3♠ nên được đi trước.", "success");
@@ -83,6 +85,23 @@
         return state.started && !state.gameOver && state.currentPlayer === 0 && !state.players[0].finished;
     }
 
+    function updateHintCards() {
+        state.hintCardIds.clear();
+        if (!isHumanTurn() || state.selectedCardIds.size) return;
+        const human = state.players[0];
+        const move = Bot.chooseMove(human.hand, state.tablePlay ? state.tablePlay.combo : null, {
+            requiredCardId: state.firstMove ? "3-0" : null,
+            opponents: state.players.filter(function (player) { return player.id !== 0; }),
+            difficulty: "hard"
+        });
+        if (move) move.cards.forEach(function (card) { state.hintCardIds.add(card.id); });
+    }
+
+    function renderGame() {
+        updateHintCards();
+        UI.render(state);
+    }
+
     function toggleCard(cardId) {
         if (!isHumanTurn()) {
             return;
@@ -94,7 +113,7 @@
             state.selectedCardIds.add(cardId);
         }
 
-        UI.render(state);
+        renderGame();
     }
 
     function selectedCards() {
@@ -162,11 +181,12 @@
         }
 
         if (state.gameOver) {
-            UI.render(state);
+            renderGame();
             botTimer = window.setTimeout(function () {
                 let settlement = null;
                 if (!state.rewardSettled && app.Portal && app.Portal.settleResult) {
-                    settlement = app.Portal.settleResult(state.rankings[0].id === 0);
+                    const humanRank = state.rankings.findIndex(function (player) { return player.id === 0; }) + 1;
+                    settlement = app.Portal.settleRankResult ? app.Portal.settleRankResult(humanRank) : app.Portal.settleResult(humanRank === 1);
                     state.rewardSettled = true;
                 }
                 UI.showResult(state.rankings, settlement);
@@ -175,7 +195,7 @@
         }
 
         state.currentPlayer = nextActivePlayer(playerId);
-        UI.render(state);
+        renderGame();
 
         if (combo.type === "quad" || combo.type === "pairSequence") {
             UI.toast(player.name + " đánh " + combo.name + "!", "warning");
@@ -239,7 +259,7 @@
             state.currentPlayer = nextActivePlayer(playerId);
         }
 
-        UI.render(state);
+        renderGame();
         scheduleCurrentTurn();
     }
 
@@ -251,7 +271,7 @@
 
     function sortHumanCards() {
         Cards.sortCards(state.players[0].hand);
-        UI.render(state);
+        renderGame();
     }
 
     function scheduleCurrentTurn() {
@@ -301,7 +321,7 @@
         onSort: sortHumanCards
     });
 
-    UI.render(state);
+    renderGame();
 
     app.Game = {
         start: startGame,

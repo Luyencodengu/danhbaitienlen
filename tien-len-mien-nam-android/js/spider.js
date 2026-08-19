@@ -12,6 +12,8 @@
         difficulty: "easy",
         ended: false
     };
+    let drag = null;
+    let suppressClick = false;
 
     function rankLabel(rank) {
         return ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[rank] || String(rank);
@@ -68,6 +70,25 @@
         });
         state.stock = deck;
         render();
+        animateDeal("#spiderTableau .sol-card", 22);
+    }
+
+    function animateDeal(selector, step) {
+        document.querySelectorAll(selector).forEach(function (card, index) {
+            card.style.setProperty("--deal-delay", (index * step) + "ms");
+            card.classList.add("dealing");
+        });
+    }
+
+    function celebrateSet() {
+        const board = document.querySelector("#spiderScreen .solitaire-board");
+        const effect = document.createElement("div");
+        effect.className = "set-complete-fx";
+        effect.innerHTML = "<strong>HOÀN TẤT BỘ K → A</strong>" + Array.from({ length: 18 }, function (_, index) {
+            return "<i style=\"--star-angle:" + (index * 20) + "deg\">✦</i>";
+        }).join("");
+        board.appendChild(effect);
+        window.setTimeout(function () { effect.remove(); }, 1500);
     }
 
     function cardMarkup(card, columnIndex, cardIndex, top, selected) {
@@ -79,7 +100,9 @@
         return "<button class=\"sol-card " + (isRed ? "red " : "") + (selected ? "selected" : "") +
             "\" type=\"button\" data-col=\"" + columnIndex + "\" data-index=\"" + cardIndex +
             "\" style=\"--card-top:" + top + "px\" aria-label=\"" + rankLabel(card.rank) + SUITS[card.suit] + "\">" +
-            "<span class=\"sol-rank\">" + rankLabel(card.rank) + "</span><span class=\"sol-suit\">" + SUITS[card.suit] + "</span></button>";
+            "<span class=\"sol-corner top\"><b>" + rankLabel(card.rank) + "</b><i>" + SUITS[card.suit] + "</i></span>" +
+            "<span class=\"sol-center-suit\">" + SUITS[card.suit] + "</span>" +
+            "<span class=\"sol-corner bottom\"><b>" + rankLabel(card.rank) + "</b><i>" + SUITS[card.suit] + "</i></span></button>";
     }
 
     function render() {
@@ -90,7 +113,7 @@
             const cards = column.map(function (card, cardIndex) {
                 const selected = state.selected && state.selected.col === columnIndex && cardIndex >= state.selected.index;
                 const html = cardMarkup(card, columnIndex, cardIndex, top, selected);
-                top += card.faceUp ? (compact ? 17 : 25) : (compact ? 10 : 14);
+                top += card.faceUp ? (compact ? 27 : 34) : (compact ? 12 : 16);
                 return html;
             }).join("");
             return "<div class=\"solitaire-column" + (column.length ? "" : " empty") + "\" data-spider-column=\"" + columnIndex + "\">" + cards + "</div>";
@@ -175,6 +198,7 @@
         column.splice(-13, 13);
         state.completed += 1;
         flipLast(column);
+        celebrateSet();
         app.Portal.toast("Hoàn thành một bộ K → A!", "success");
         checkCompleted(columnIndex);
     }
@@ -196,6 +220,7 @@
         state.selected = null;
         state.moves += 1;
         render();
+        animateDeal("#spiderTableau .solitaire-column .sol-card:last-child", 75);
         checkEnd();
     }
 
@@ -234,6 +259,7 @@
     }
 
     document.getElementById("spiderTableau").addEventListener("click", function (event) {
+        if (suppressClick) { suppressClick = false; return; }
         if (state.ended) {
             return;
         }
@@ -253,6 +279,71 @@
         } else if (card) {
             selectCard(Number(card.dataset.col), Number(card.dataset.index));
         }
+    });
+
+    function clearDragVisual() {
+        document.querySelectorAll(".drag-source, .drop-target").forEach(function (element) { element.classList.remove("drag-source", "drop-target"); });
+        const ghost = document.querySelector(".card-drag-ghost");
+        if (ghost) ghost.remove();
+    }
+
+    document.getElementById("spiderTableau").addEventListener("pointerdown", function (event) {
+        const card = event.target.closest("[data-col]");
+        if (!card || state.ended || event.button > 0) return;
+        const col = Number(card.dataset.col);
+        const index = Number(card.dataset.index);
+        if (!isPackedSequence(state.tableau[col], index)) return;
+        drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, col: col, index: index, active: false };
+    });
+
+    window.addEventListener("pointermove", function (event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        if (!drag.active && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 7) return;
+        if (!drag.active) {
+            drag.active = true;
+            state.selected = { col: drag.col, index: drag.index };
+            const sourceCards = document.querySelectorAll("[data-col=\"" + drag.col + "\"]");
+            const ghost = document.createElement("div");
+            ghost.className = "card-drag-ghost";
+            Array.from(sourceCards).slice(drag.index).forEach(function (element, offset) {
+                const clone = element.cloneNode(true);
+                clone.style.top = (offset * 29) + "px";
+                clone.style.setProperty("--card-top", "0px");
+                ghost.appendChild(clone);
+                element.classList.add("drag-source");
+            });
+            document.body.appendChild(ghost);
+        }
+        event.preventDefault();
+        const ghost = document.querySelector(".card-drag-ghost");
+        if (ghost) ghost.style.transform = "translate(" + (event.clientX + 10) + "px," + (event.clientY + 10) + "px)";
+        document.querySelectorAll(".drop-target").forEach(function (element) { element.classList.remove("drop-target"); });
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const column = target && target.closest("[data-spider-column]");
+        if (column && Number(column.dataset.spiderColumn) !== drag.col) column.classList.add("drop-target");
+    }, { passive: false });
+
+    window.addEventListener("pointerup", function (event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const source = drag;
+        drag = null;
+        if (!source.active) return;
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const column = target && target.closest("[data-spider-column]");
+        clearDragVisual();
+        suppressClick = true;
+        window.setTimeout(function () { suppressClick = false; }, 0);
+        state.selected = { col: source.col, index: source.index };
+        if (column) tryMove(Number(column.dataset.spiderColumn));
+        else { state.selected = null; render(); }
+    });
+
+    window.addEventListener("pointercancel", function () {
+        if (!drag) return;
+        drag = null;
+        clearDragVisual();
+        state.selected = null;
+        render();
     });
 
     document.getElementById("spiderStock").addEventListener("click", dealStock);
